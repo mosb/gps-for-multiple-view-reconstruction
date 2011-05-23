@@ -1,0 +1,57 @@
+\documentclass{article}
+\begin{document}
+
+\newcommand\Nrm{\mathcal{N}}
+
+\newcommand\Ideal{\gamma}
+\newcommand\FallOff{\rho}
+\newcommand\NoiseVar{\Sigma}
+\newcommand\Mix{\alpha}
+
+\newcommand\Feature{f}
+\newcommand\Features{\mathbf{f}}
+\newcommand\Model{z}
+\newcommand\Params{\theta}
+
+\newcommand\UnderlyingF{\mu_k}
+
+The image contains $n \times m$ pixels.
+
+There are $k$ features $\Feature_k$ observed at each pixels.
+
+A reconstruction $\Model=\{\Model_i\}$ consists of a $y$--coordinate
+for each image column $i$. So each $(i,\Model_i)$ is the coordinates
+of a pixel on the floor/wall intersection.
+
+Hyper--parameters $\Params$ consist of (for each of $k$ features):
+\begin{itemize}
+  \item{$\Ideal_k\in\Re$, the ``ideal'' value of the feature $\Feature_k$ we
+    expect to observe at the floor/wall intersection. This
+    is the same for all columns.}
+  \item{$\FallOff_k>0$, the ``fall-off'' rate at which $\Feature_k$
+    diminishes as we move away from the floor/wall intersection
+    $(i,z_i)$ (is actually the variance of an un--normalized
+    Gaussian).}
+  \item{$\NoiseVar_k > 0$, the Gaussian variance for the noise model in
+    feature $\Feature_k$}
+  \item{$\alpha_k \in [0,1]$, the probability that the measurement $\Feature_k$
+    arose from the signal we're interested in as opposed to a
+    background noise process.}
+\end{itemize}
+
+In addition, $\Params$ contains the mean $\mu_0$ and variance $\Sigma_0$ for the
+background noise process, which is shared by all $k$ features.
+
+A feature vector $\Features$ at row $i$, column $j$ is then
+distributed as
+\begin{equation}
+  P(\Features ~|~ \Model, \Params) = \prod_k
+    \Mix_k \Nrm(\Feature_k; \UnderlyingF, \NoiseVar_k) +
+    (1-\Mix_k) \Nrm(\Feature_k; \mu_0, \Sigma_0)
+\end{equation}
+where
+\begin{equation}
+  \UnderlyingF = \Ideal_k \Nrm(j; \Model_i, \rho_k)
+\end{equation}
+
+\end{document}
