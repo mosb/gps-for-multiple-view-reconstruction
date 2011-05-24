@@ -1,5 +1,11 @@
 \documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
 \begin{document}
+
+\newcommand{\pd}{\partial}
 
 \newcommand\Nrm{\mathcal{N}}
 
@@ -44,14 +50,53 @@ background noise process, which is shared by all $k$ features.
 
 A feature vector $\Features$ at row $i$, column $j$ is then
 distributed as
-\begin{equation}
+\begin{equation}\label{eq:likelihood}
   P(\Features ~|~ \Model, \Params) = \prod_k
     \Mix_k \Nrm(\Feature_k; \UnderlyingF, \NoiseVar_k) +
     (1-\Mix_k) \Nrm(\Feature_k; \mu_0, \Sigma_0)
 \end{equation}
 where
 \begin{equation}
-  \UnderlyingF = \Ideal_k \Nrm(j; \Model_i, \rho_k)
+  \UnderlyingF = \Ideal_k\, \Nrm(j; \Model_i, \rho_k)
 \end{equation}
+
+Note that \eqref{eq:likelihood} can be interpreted as the likelihood of our model. For computational purposes, we ordinarily choose to work with its logarithm
+\begin{multline}\label{eq:loglikelihood}
+ \log P(\Features ~|~ \Model, \Params) = \sum_k \biggl(
+    -\nicefrac{1}{2}\log 2 \pi \Sigma_k 
+    -\nicefrac{1}{2}\,{\Sigma_k}^{-1}\bigl(f_k - \Ideal_k\, \Nrm(j; \Model_i, \rho_k)\bigr)^2\\
+    +\log \Bigl(\Mix_k + (1-\Mix_k) \frac{\Nrm(\Feature_k; \mu_0, \Sigma_0)}{\Nrm(\Feature_k; \mu_k, \Sigma_k)}\Bigr)
+\biggr)\,.
+\end{multline}
+Its derivatives are
+\begin{align}\label{eq:grad_loglikelihood}
+\frac{\pd \log P(\Features ~|~ \Model, \Params)}{\pd  \Ideal_k}
+    & =
+    {\Sigma_k}^{-1}\bigl(f_k - \Ideal_k\, \Nrm(j; \Model_i, \rho_k)\bigr) \Nrm(j; \Model_i, \rho_k)\\
+\frac{\pd \log P(\Features ~|~ \Model, \Params)}{\pd  \rho_k}
+    & =
+    {\Sigma_k}^{-1}\bigl(f_k - \Ideal_k\, \Nrm(j; \Model_i, \rho_k)\bigr) \Ideal_k\,\Nrm(j; \Model_i, \rho_k)\frac{(j-\Model_i)^2}{2 \rho_k^2}\\
+\frac{\pd \log P(\Features ~|~ \Model, \Params)}{\pd  \Sigma_k}
+    & =
+    -\nicefrac{1}{2}{\Sigma_k}^{-1}
+    +\nicefrac{1}{2}{\Sigma_k}^{-2}\bigl(f_k - \Ideal_k\, \Nrm(j; \Model_i, \rho_k)\bigr)^2\\
+    & \hspace{2cm} +\frac{ (1-\Mix_k) \frac{\Nrm(\Feature_k; \mu_0, \Sigma_0)}{\Nrm(\Feature_k; \mu_k, \Sigma_k)}\frac{(f_k-\mu_k)^2}{2 \Sigma_k^2}}
+    {\Mix_k + (1-\Mix_k) \frac{\Nrm(\Feature_k; \mu_0, \Sigma_0)}{\Nrm(\Feature_k; \mu_k, \Sigma_k)}}\\
+\frac{\pd \log P(\Features ~|~ \Model, \Params)}{\pd  \alpha_k}
+    & =
+    \frac{ 1-\frac{\Nrm(\Feature_k; \mu_0, \Sigma_0)}{\Nrm(\Feature_k; \mu_k, \Sigma_k)}}
+    {\Mix_k + (1-\Mix_k) \frac{\Nrm(\Feature_k; \mu_0, \Sigma_0)}{\Nrm(\Feature_k; \mu_k, \Sigma_k)}}\\
+\frac{\pd \log P(\Features ~|~ \Model, \Params)}{\pd  \mu_0}
+    & = \sum_k
+    \frac{ (1-\Mix_k)\frac{\Nrm(\Feature_k; \mu_0, \Sigma_0)}{\Nrm(\Feature_k; \mu_k, \Sigma_k)}\frac{f_k-\mu_0}{\Sigma_0}}
+    {\Mix_k + (1-\Mix_k) \frac{\Nrm(\Feature_k; \mu_0, \Sigma_0)}{\Nrm(\Feature_k; \mu_k, \Sigma_k)}}
+    \\
+\frac{\pd \log P(\Features ~|~ \Model, \Params)}{\pd  \Sigma_0}
+    & = \sum_k
+    \frac{ (1-\Mix_k)\frac{\Nrm(\Feature_k; \mu_0, \Sigma_0)}{\Nrm(\Feature_k; \mu_k, \Sigma_k)}\frac{(f_k-\mu_0)^2}{2 \Sigma_0^2}}
+    {\Mix_k + (1-\Mix_k) \frac{\Nrm(\Feature_k; \mu_0, \Sigma_0)}{\Nrm(\Feature_k; \mu_k, \Sigma_k)}}
+\end{align}
+
+
 
 \end{document}
